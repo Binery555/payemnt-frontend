@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>USDT Deposit — OnexGain Signal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- QR generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+  <style>
+    /* ===== Global ===== */
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #000; color: #FFD700;
+      overflow-y: auto;
+    }
+    /* ===== Full Screen Container ===== */
+    .fullscreen {
+      width: 100vw; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 2rem 1.25rem; box-sizing: border-box; gap: .35rem;
+    }
+    .row { width: 100%; max-width: 520px; }
+
+    input, select, textarea, button {
+      width: 100%; padding: 1rem; margin-top: .5rem;
+      border-radius: 10px; font-size: 1rem;
+      border: 1px solid #2b2b2b; background: #111916; color: #FFD700;
+      outline: none; box-shadow: inset 0 0 0 rgba(0,0,0,0);
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #E6BE00; box-shadow: 0 0 0 3px rgba(230,190,0,.15);
+    }
+    button { background: #FFD700; color: #000; font-weight: 700; cursor: pointer; border: none; }
+    button:hover { background: #E6BE00; transform: translateY(-1px); }
+    button:disabled { background:#444; color:#999; cursor:not-allowed; transform:none; }
+    label { display:block; margin-top: .9rem; color: #FFD700; font-weight: 700; }
+    small.hint { color:#b9b9b9; display:block; margin-top:.25rem }
+    h2, h3 { color:#FFD700; margin: .2rem 0 1rem; text-align:center }
+    .muted { color:#d7d7d7 }
+
+    @media (max-width: 600px) { input, select, textarea, button { padding: .9rem; } }
+
+    /* ===== Overlays ===== */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      padding: 2rem 1rem; box-sizing: border-box; overflow-y: auto; z-index: 20;
+    }
+
+    /* Step flow */
+    #stepFlow .card {
+      background: #1b1b1b; color: #FFD700; width: min(520px, 92vw);
+      padding: 1.5rem; border-radius: 14px; border: 1px solid #2b2b2b; text-align: center;
+    }
+    .kv { text-align:left; margin: .25rem 0; }
+    .kv b { color:#FFD700 }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace }
+
+    .notice {
+      margin-top:.75rem; padding:.75rem 1rem; border-radius:10px;
+      border:1px solid #3a3000; background:#1a1600; color:#ffd700; text-align:left;
+    }
+
+    /* Success view */
+    #requestConfirm .success-box {
+      background: #222; color:#FFD700; width: min(560px, 92vw);
+      padding: 2rem; border-radius: 16px; border: 1px solid #2b2b2b; text-align:center;
+    }
+    .icon-container { width: 100px; margin: 0 auto 20px; }
+    .checkmark-circle { fill: #FFD700; transform-origin: center; animation: popCircle .5s ease-out forwards; }
+    .checkmark {
+      fill: none; stroke: #000; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 100; stroke-dashoffset: 100; animation: drawCheck 1s ease forwards .5s;
+    }
+    @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+    @keyframes popCircle { from { transform: scale(0); } to { transform: scale(1); } }
+    .title { font-size: 26px; margin: 16px 0; color: #FFD700; }
+    .details { margin: 18px auto 0; max-width: 460px; text-align: left; color: #DDD; }
+    .details p { margin: .45rem 0; }
+    .highlight { font-weight: 800; color: #FFD700; }
+
+    .button-red {
+      background-color: #f44336; color: #fff; border: none; padding: 12px 24px;
+      font-size: 16px; border-radius: 10px; cursor: pointer; margin-top: 26px;
+    }
+    .button-red:hover { background-color: #d32f2f; }
+
+    .copy {
+      display:inline-flex; gap:.5rem; align-items:center;
+      padding:.5rem .75rem; border:1px solid #3a3a3a; border-radius:8px;
+      background:#141414; color:#ffd700; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Deposit Form -->
+  <div class="fullscreen" id="mainBox">
+    <h2>USDT Deposit</h2>
+
+    <!-- Package Type (fixed) -->
+    <div class="row">
+      <label for="package_type">Package Type</label>
+      <input id="package_type" value="OnexGain Signal" readonly />
+      <small class="hint">This package is fixed for this deposit.</small>
+    </div>
+
+    <!-- Coin (Binance coins list) -->
+    <div class="row">
+      <label for="coin">Coin</label>
+      <select id="coin" onchange="updateDepositWallet()">
+        <optgroup label="Stablecoins">
+          <option value="USDT" selected>USDT (Tether)</option>
+          <option value="USDC">USDC</option>
+          <option value="FDUSD">FDUSD</option>
+          <option value="BUSD">BUSD</option>
+        </optgroup>
+        <optgroup label="Top">
+          <option value="BTC">BTC</option>
+          <option value="ETH">ETH</option>
+          <option value="BNB">BNB</option>
+          <option value="SOL">SOL</option>
+          <option value="XRP">XRP</option>
+          <option value="ADA">ADA</option>
+          <option value="DOGE">DOGE</option>
+          <option value="TRX">TRX</option>
+          <option value="TON">TON</option>
+          <option value="AVAX">AVAX</option>
+          <option value="DOT">DOT</option>
+          <option value="MATIC">MATIC</option>
+          <option value="SHIB">SHIB</option>
+          <option value="LINK">LINK</option>
+          <option value="NEAR">NEAR</option>
+          <option value="APT">APT</option>
+          <option value="ARB">ARB</option>
+          <option value="OP">OP</option>
+          <option value="SUI">SUI</option>
+          <option value="SEI">SEI</option>
+          <option value="JUP">JUP</option>
+          <option value="PYTH">PYTH</option>
+          <option value="ENA">ENA</option>
+          <option value="PEPE">PEPE</option>
+          <option value="WIF">WIF</option>
+          <option value="NOT">NOT</option>
+          <option value="RUNE">RUNE</option>
+          <option value="INJ">INJ</option>
+          <option value="AAVE">AAVE</option>
+          <option value="UNI">UNI</option>
+          <option value="FIL">FIL</option>
+          <option value="ICP">ICP</option>
+          <option value="ETC">ETC</option>
+          <option value="ATOM">ATOM</option>
+          <option value="LTC">LTC</option>
+          <option value="BCH">BCH</option>
+          <option value="XLM">XLM</option>
+          <option value="TIA">TIA</option>
+          <option value="ZK">ZK</option>
+          <option value="STRK">STRK</option>
+        </optgroup>
+      </select>
+      <small class="hint">All coins selectable. <b>Payments are accepted in USDT (TRC20)</b> and will show a TRC20 address + QR.</small>
+    </div>
+
+    <!-- Amount (fixed to 349) -->
+    <div class="row">
+      <label for="amount">Amount (USD)</label>
+      <input type="number" id="amount" value="349.00" min="349" max="349" step="0.01" inputmode="decimal" readonly />
+      <small class="hint">Amount is locked to <b>$349.00</b>.</small>
+    </div>
+
+    <!-- Order ID (auto) -->
+    <div class="row">
+      <label for="order_id">Order ID</label>
+      <input type="text" id="order_id" class="mono" readonly />
+      <small class="hint">Auto-generated. Keep this for support.</small>
+    </div>
+
+    <!-- Email -->
+    <div class="row">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="you@example.com" />
+    </div>
+
+    <!-- Remark -->
+    <div class="row">
+      <label for="remark">Remark (Optional)</label>
+      <textarea id="remark" rows="3" placeholder="Any note…"></textarea>
+    </div>
+
+    <div class="row" style="margin-top:1rem">
+      <button id="submitBtn" onclick="startFlow()">Submit</button>
+      <small class="hint">Your request auto-saves locally and posts to the backend for live update.</small>
+    </div>
+  </div>
+
+  <!-- Deposit Step-Flow Overlay -->
+  <div class="overlay" id="stepFlow">
+
+    <!-- ===== Step 2 (kept as is) ===== -->
+    <div class="card" id="step2Card">
+      <h3>Step 2: Scan or Copy Wallet</h3>
+
+      <div id="payNotice" class="notice" style="display:none"></div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; gap:.5rem; margin-top:.5rem">
+        <canvas id="qrCanvas"></canvas>
+        <div class="kv mono"><b>Wallet:</b> <span id="walletDisplay"></span></div>
+        <div class="kv mono"><b>Network:</b> <span id="netDisplay">TRC20</span></div>
+        <button id="copyBtn" class="copy" onclick="copyWallet()"><span>Copy Address</span></button>
+      </div>
+
+      <div style="margin-top:1rem">
+        <button id="paidBtn" onclick="goToStep3()">✅ I Have Paid</button>
+      </div>
+    </div>
+
+    <!-- ===== Step 3 (TXID only) ===== -->
+    <div class="card" id="step3" style="display:none; margin-top:1rem">
+      <h3>Step 3: Enter TXID</h3>
+      <input type="text" id="txidInput" placeholder="TXID e.g. cb8f9d..." class="mono" />
+      <button style="margin-top:.75rem" onclick="submitTxid()">Submit</button>
+    </div>
+
+  </div>
+
+  <!-- Deposit Request Confirmation Overlay -->
+  <div class="overlay" id="requestConfirm">
+    <div class="success-box">
+      <div class="icon-container">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="checkmark-circle" cx="50" cy="50" r="45" />
+          <path class="checkmark" d="M30 52 L45 67 L70 40" />
+        </svg>
+      </div>
+
+      <div class="title">Deposit Request Confirmation</div>
+      <p>Thank you <span class="highlight" id="conf_email"></span>,<br> Your deposit request has been received!</p>
+
+      <div class="details">
+        <p><b>Package</b>: <span id="conf_package"></span></p>
+        <p><b>Coin</b>: <span id="conf_coin"></span></p>
+        <p><b>Order ID</b>: <span class="mono" id="conf_order"></span></p>
+        <p><b>Amount</b>: <span id="conf_amt"></span></p>
+        <p><b>Date</b>: <span id="conf_date"></span></p>
+        <p><b>TXID</b>: <code id="conf_txid">—</code></p>
+      </div>
+
+      <button class="button-red" onclick="window.location.reload()">New Deposit</button>
+    </div>
+  </div>
+
+  <script>
+    /* ====== CONFIG ====== */
+    // Map ONLY addresses you accept. TRC20 address shown for USDT.
+    const depositWallets = {
+      USDT: 'TEhNp5oQPamMc8HXXkngTmXECVfDDS4zEj', // TRC20
+      BTC: '', ETH: '', BNB: '', SOL: '', XRP: '', ADA: '', DOGE: '',
+      TRX: '', TON: '', AVAX: '', DOT: '', MATIC:'', SHIB: '', LINK: '',
+      NEAR: '', APT: '', ARB: '', OP: '', SUI: '', SEI: '', JUP: '', PYTH: '',
+      ENA: '', PEPE: '', WIF: '', NOT: '', RUNE: '', INJ: '', AAVE: '', UNI: '',
+      FIL: '', ICP: '', ETC: '', ATOM: '', LTC: '', BCH: '', XLM: '', TIA: '',
+      USDC: '', FDUSD:'', BUSD: ''
+    };
+
+    const STORAGE_KEY = 'cashier_requests';
+    let selectedCoin = 'USDT';
+    let selectedWallet = depositWallets['USDT'];
+
+    /* ====== HELPERS ====== */
+    const pad = (n) => String(n).padStart(2,'0');
+
+    function genOrderId() {
+      const d = new Date();
+      const y = d.getFullYear(), m = pad(d.getMonth()+1), day = pad(d.getDate());
+      const rand = Math.random().toString(36).slice(2,8).toUpperCase();
+      return `OXG-${y}${m}${day}-${rand}`;
+    }
+
+    function todayStr() {
+      const d = new Date();
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    }
+
+    function saveToHistory(entry) {
+      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      history.push(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    }
+
+    function updateLast(fn) {
+      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (!history.length) return null;
+      const last = history[history.length - 1];
+      fn(last);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      return last;
+    }
+
+    async function postJSON(url, data) {
+      try {
+        await fetch(url, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch(e) {
+        // Fail silently (keeps UI flow).
+        console.warn('POST failed', e);
+      }
+    }
+
+    function copyWallet(){
+      const addr = selectedWallet || '';
+      if(!addr) return;
+      navigator.clipboard.writeText(addr).then(()=>{
+        const btn = document.getElementById('copyBtn');
+        const txt = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(()=>btn.innerText = txt, 1000);
+      });
+    }
+
+    /* ====== UI LOGIC ====== */
+    function updateDepositWallet() {
+      selectedCoin = document.getElementById('coin').value;
+      selectedWallet = depositWallets[selectedCoin] || '';
+      const net = (selectedCoin === 'USDT') ? 'TRC20' : '—';
+      document.getElementById('netDisplay').innerText = net;
+
+      const notice = document.getElementById('payNotice');
+      const paidBtn = document.getElementById('paidBtn');
+
+      if (selectedCoin !== 'USDT') {
+        // Accept only USDT(TRC20) by default. Show info and disable continue.
+        notice.style.display = 'block';
+        notice.innerHTML = `<b>Note:</b> Payments are processed in <b>USDT (TRC20)</b>. You selected <b>${selectedCoin}</b>. Please switch to <b>USDT</b> to proceed.`;
+        paidBtn.disabled = true;
+      } else {
+        notice.style.display = 'none';
+        paidBtn.disabled = false;
+      }
+    }
+
+    function startFlow() {
+      const packageType = document.getElementById('package_type').value;
+      const coin = document.getElementById('coin').value;
+      const amt = parseFloat(document.getElementById('amount').value);
+      const orderId = document.getElementById('order_id').value;
+      const email = document.getElementById('email').value.trim();
+      const remark = document.getElementById('remark').value.trim();
+
+      if (!email) return alert('Enter your email address.');
+      if (amt !== 349) return alert('Amount must be $349.00');
+
+      if (coin !== 'USDT') {
+        alert('Payments are accepted in USDT (TRC20). Switching coin to USDT.');
+        document.getElementById('coin').value = 'USDT';
+        updateDepositWallet();
+      }
+
+      const timestamp = todayStr();
+      const req = {
+        package_type: packageType, type: 'Deposit',
+        coin: 'USDT', amount: 349.00, order_id: orderId,
+        email, remark, timestamp,
+        wallet_address: depositWallets['USDT'],
+        network: 'TRC20', status: 'pending'
+      };
+
+      // Backend post + local autosave
+      postJSON('/api/requests', { action:'create', ...req });
+      saveToHistory(req);
+
+      // Go to Step 2
+      document.getElementById('mainBox').style.display = 'none';
+      document.getElementById('stepFlow').style.display = 'flex';
+
+      // QR + wallet render (USDT/TRC20)
+      const wallet = depositWallets['USDT'];
+      document.getElementById('walletDisplay').innerText = wallet;
+      QRCode.toCanvas(document.getElementById('qrCanvas'), wallet);
+
+      // Ensure coin state
+      document.getElementById('coin').value = 'USDT';
+      updateDepositWallet();
+    }
+
+    function goToStep3() {
+      // Hide Step 2 completely so Step 3 shows TXID input ONLY
+      document.getElementById('step2Card').style.display = 'none';
+      document.getElementById('step3').style.display = 'block';
+      document.getElementById('step3').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function submitTxid() {
+      const txid = document.getElementById('txidInput').value.trim();
+      if (!txid || txid.length < 20) return alert('Enter a valid TXID.');
+
+      const last = updateLast((entry)=>{
+        entry.txid = txid;
+        entry.status = 'submitted';
+      });
+
+      postJSON('/api/requests', { action:'txid', order_id: last?.order_id, txid });
+
+      // Close step overlay and show confirmation
+      document.getElementById('stepFlow').style.display = 'none';
+      showConfirmation(last);
+    }
+
+    function showConfirmation(data) {
+      document.getElementById('conf_package').innerText = data.package_type;
+      document.getElementById('conf_coin').innerText = data.coin;
+      document.getElementById('conf_email').innerText = data.email;
+      document.getElementById('conf_order').innerText = data.order_id;
+      document.getElementById('conf_amt').innerText = Number(data.amount).toFixed(2);
+      document.getElementById('conf_date').innerText = data.timestamp;
+      document.getElementById('conf_txid').innerText = data.txid || '—';
+      document.getElementById('requestConfirm').style.display = 'flex';
+    }
+
+    /* ====== INIT ====== */
+    (function init(){
+      // Pre-fill order id
+      document.getElementById('order_id').value = genOrderId();
+      // Lock amount formatting
+      const amt = document.getElementById('amount');
+      amt.value = Number(amt.value).toFixed(2);
+      // Ensure coin state
+      updateDepositWallet();
+    })();
+  </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
