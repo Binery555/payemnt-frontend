@@ -1,21 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Untitled</title>
-  
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>USDT Deposit — OnexGain Signal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- QR generator -->
+  <!-- (QR lib kept but unused now; safe to remove if you like) -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
   <style>
@@ -53,6 +43,7 @@
     small.hint { color:#b9b9b9; display:block; margin-top:.25rem }
     h2, h3 { color:#FFD700; margin: .2rem 0 1rem; text-align:center }
     .muted { color:#d7d7d7 }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace }
 
     @media (max-width: 600px) { input, select, textarea, button { padding: .9rem; } }
 
@@ -70,11 +61,16 @@
     }
     .kv { text-align:left; margin: .25rem 0; }
     .kv b { color:#FFD700 }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace }
 
     .notice {
       margin-top:.75rem; padding:.75rem 1rem; border-radius:10px;
       border:1px solid #3a3000; background:#1a1600; color:#ffd700; text-align:left;
+    }
+
+    .copy {
+      display:inline-flex; gap:.5rem; align-items:center;
+      padding:.5rem .75rem; border:1px solid #3a3a3a; border-radius:8px;
+      background:#141414; color:#ffd700; cursor:pointer;
     }
 
     /* Success view */
@@ -101,11 +97,14 @@
     }
     .button-red:hover { background-color: #d32f2f; }
 
-    .copy {
-      display:inline-flex; gap:.5rem; align-items:center;
-      padding:.5rem .75rem; border:1px solid #3a3a3a; border-radius:8px;
-      background:#141414; color:#ffd700; cursor:pointer;
+    .dl-btn {
+      margin-top: .5rem;
+      background:#FFD700; color:#000; font-weight:700; border:none; border-radius:10px;
+      padding:12px 18px; cursor:pointer;
     }
+    .dl-btn:hover { background:#E6BE00; }
+    .below-note { color:#d7d7d7; margin-top:.6rem; font-size:.95rem; }
+    .wallet-img { width: 260px; max-width: 85%; border-radius: 12px; border:1px solid #333; }
   </style>
 </head>
 <body>
@@ -116,7 +115,7 @@
     <!-- Package Type (fixed) -->
     <div class="row">
       <label for="package_type">Package Type</label>
-      <input id="package_type" value="OnexGain Signal" readonly />
+      <input id="package_type" value="Basic plan" readonly />
       <small class="hint">This package is fixed for this deposit.</small>
     </div>
 
@@ -131,49 +130,23 @@
           <option value="BUSD">BUSD</option>
         </optgroup>
         <optgroup label="Top">
-          <option value="BTC">BTC</option>
-          <option value="ETH">ETH</option>
-          <option value="BNB">BNB</option>
-          <option value="SOL">SOL</option>
-          <option value="XRP">XRP</option>
-          <option value="ADA">ADA</option>
-          <option value="DOGE">DOGE</option>
-          <option value="TRX">TRX</option>
-          <option value="TON">TON</option>
-          <option value="AVAX">AVAX</option>
-          <option value="DOT">DOT</option>
-          <option value="MATIC">MATIC</option>
-          <option value="SHIB">SHIB</option>
-          <option value="LINK">LINK</option>
-          <option value="NEAR">NEAR</option>
-          <option value="APT">APT</option>
-          <option value="ARB">ARB</option>
-          <option value="OP">OP</option>
-          <option value="SUI">SUI</option>
-          <option value="SEI">SEI</option>
-          <option value="JUP">JUP</option>
-          <option value="PYTH">PYTH</option>
-          <option value="ENA">ENA</option>
-          <option value="PEPE">PEPE</option>
-          <option value="WIF">WIF</option>
-          <option value="NOT">NOT</option>
-          <option value="RUNE">RUNE</option>
-          <option value="INJ">INJ</option>
-          <option value="AAVE">AAVE</option>
-          <option value="UNI">UNI</option>
-          <option value="FIL">FIL</option>
-          <option value="ICP">ICP</option>
-          <option value="ETC">ETC</option>
-          <option value="ATOM">ATOM</option>
-          <option value="LTC">LTC</option>
-          <option value="BCH">BCH</option>
-          <option value="XLM">XLM</option>
-          <option value="TIA">TIA</option>
-          <option value="ZK">ZK</option>
+          <option value="BTC">BTC</option><option value="ETH">ETH</option><option value="BNB">BNB</option>
+          <option value="SOL">SOL</option><option value="XRP">XRP</option><option value="ADA">ADA</option>
+          <option value="DOGE">DOGE</option><option value="TRX">TRX</option><option value="TON">TON</option>
+          <option value="AVAX">AVAX</option><option value="DOT">DOT</option><option value="MATIC">MATIC</option>
+          <option value="SHIB">SHIB</option><option value="LINK">LINK</option><option value="NEAR">NEAR</option>
+          <option value="APT">APT</option><option value="ARB">ARB</option><option value="OP">OP</option>
+          <option value="SUI">SUI</option><option value="SEI">SEI</option><option value="JUP">JUP</option>
+          <option value="PYTH">PYTH</option><option value="ENA">ENA</option><option value="PEPE">PEPE</option>
+          <option value="WIF">WIF</option><option value="NOT">NOT</option><option value="RUNE">RUNE</option>
+          <option value="INJ">INJ</option><option value="AAVE">AAVE</option><option value="UNI">UNI</option>
+          <option value="FIL">FIL</option><option value="ICP">ICP</option><option value="ETC">ETC</option>
+          <option value="ATOM">ATOM</option><option value="LTC">LTC</option><option value="BCH">BCH</option>
+          <option value="XLM">XLM</option><option value="TIA">TIA</option><option value="ZK">ZK</option>
           <option value="STRK">STRK</option>
         </optgroup>
       </select>
-      <small class="hint">All coins selectable. <b>Payments are accepted in USDT (TRC20)</b> and will show a TRC20 address + QR.</small>
+      <small class="hint">All coins selectable. <b>Payments are accepted in USDT (TRC20)</b> and will show a TRC20 address and your provided image.</small>
     </div>
 
     <!-- Amount (fixed to 349) -->
@@ -210,15 +183,15 @@
 
   <!-- Deposit Step-Flow Overlay -->
   <div class="overlay" id="stepFlow">
-
-    <!-- ===== Step 2 (kept as is) ===== -->
+    <!-- ===== Step 2 (image + wallet) ===== -->
     <div class="card" id="step2Card">
       <h3>Step 2: Scan or Copy Wallet</h3>
 
       <div id="payNotice" class="notice" style="display:none"></div>
 
-      <div style="display:flex; flex-direction:column; align-items:center; gap:.5rem; margin-top:.5rem">
-        <canvas id="qrCanvas"></canvas>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:.65rem; margin-top:.5rem">
+        <!-- Your JPG instead of QR -->
+        <img class="wallet-img" id="walletImg" alt="Payment Image" src="https://iili.io/Kl3wWqQ.jpg"/>
         <div class="kv mono"><b>Wallet:</b> <span id="walletDisplay"></span></div>
         <div class="kv mono"><b>Network:</b> <span id="netDisplay">TRC20</span></div>
         <button id="copyBtn" class="copy" onclick="copyWallet()"><span>Copy Address</span></button>
@@ -232,15 +205,17 @@
     <!-- ===== Step 3 (TXID only) ===== -->
     <div class="card" id="step3" style="display:none; margin-top:1rem">
       <h3>Step 3: Enter TXID</h3>
-      <input type="text" id="txidInput" placeholder="TXID e.g. cb8f9d..." class="mono" />
+      <input type="text" id="txidInput" placeholder="TXID (min 6 characters)" class="mono" />
       <button style="margin-top:.75rem" onclick="submitTxid()">Submit</button>
     </div>
-
   </div>
 
   <!-- Deposit Request Confirmation Overlay -->
   <div class="overlay" id="requestConfirm">
     <div class="success-box">
+      <!-- Download slip button ABOVE the confirmation -->
+      <button class="dl-btn" id="dlSlipBtn" onclick="downloadSlipPng()">⬇️ Download Deposit Slip (PNG)</button>
+
       <div class="icon-container">
         <svg width="100" height="100" viewBox="0 0 100 100">
           <circle class="checkmark-circle" cx="50" cy="50" r="45" />
@@ -261,14 +236,15 @@
       </div>
 
       <button class="button-red" onclick="window.location.reload()">New Deposit</button>
+      <div class="below-note">Please upload your Binance payment slip along with your email address in the chat box for a prompt response</div>
     </div>
   </div>
 
   <script>
     /* ====== CONFIG ====== */
-    // Map ONLY addresses you accept. TRC20 address shown for USDT.
+    // Updated USDT(TRC20) address as requested
     const depositWallets = {
-      USDT: 'TEhNp5oQPamMc8HXXkngTmXECVfDDS4zEj', // TRC20
+      USDT: 'TGbadwWSFHBuCeRfbYfS4kA4qvtcvy7adf', // TRC20 (UPDATED)
       BTC: '', ETH: '', BNB: '', SOL: '', XRP: '', ADA: '', DOGE: '',
       TRX: '', TON: '', AVAX: '', DOT: '', MATIC:'', SHIB: '', LINK: '',
       NEAR: '', APT: '', ARB: '', OP: '', SUI: '', SEI: '', JUP: '', PYTH: '',
@@ -346,7 +322,6 @@
       const paidBtn = document.getElementById('paidBtn');
 
       if (selectedCoin !== 'USDT') {
-        // Accept only USDT(TRC20) by default. Show info and disable continue.
         notice.style.display = 'block';
         notice.innerHTML = `<b>Note:</b> Payments are processed in <b>USDT (TRC20)</b>. You selected <b>${selectedCoin}</b>. Please switch to <b>USDT</b> to proceed.`;
         paidBtn.disabled = true;
@@ -390,10 +365,8 @@
       document.getElementById('mainBox').style.display = 'none';
       document.getElementById('stepFlow').style.display = 'flex';
 
-      // QR + wallet render (USDT/TRC20)
-      const wallet = depositWallets['USDT'];
-      document.getElementById('walletDisplay').innerText = wallet;
-      QRCode.toCanvas(document.getElementById('qrCanvas'), wallet);
+      // Render new address + keep image
+      document.getElementById('walletDisplay').innerText = depositWallets['USDT'];
 
       // Ensure coin state
       document.getElementById('coin').value = 'USDT';
@@ -409,7 +382,9 @@
 
     function submitTxid() {
       const txid = document.getElementById('txidInput').value.trim();
-      if (!txid || txid.length < 20) return alert('Enter a valid TXID.');
+
+      // ✅ Allow submit if any letters/numbers length > 5
+      if (txid.length < 6) return alert('Enter a TXID with at least 6 characters.');
 
       const last = updateLast((entry)=>{
         entry.txid = txid;
@@ -434,6 +409,93 @@
       document.getElementById('requestConfirm').style.display = 'flex';
     }
 
+    // Generate a PNG "photo slip" with the key details
+    function downloadSlipPng() {
+      const w = 1080, h = 1350;
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#0b0b0b'; ctx.fillRect(0,0,w,h);
+
+      // Card
+      const pad = 60;
+      ctx.fillStyle = '#1e1e1e'; roundRect(ctx, pad, pad, w-2*pad, h-2*pad, 36, true);
+      ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 2; roundRect(ctx, pad, pad, w-2*pad, h-2*pad, 36, false);
+
+      // Title
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 54px Segoe UI, sans-serif';
+      ctx.fillText('Deposit Request Slip', pad+40, pad+100);
+
+      // Details
+      const get = id => document.getElementById(id).innerText || '';
+      const lines = [
+        ['Package', get('conf_package')],
+        ['Coin', get('conf_coin')],
+        ['Order ID', get('conf_order')],
+        ['Amount (USD)', get('conf_amt')],
+        ['Date', get('conf_date')],
+        ['TXID', get('conf_txid')],
+        ['Wallet (TRC20)', 'TGbadwWSFHBuCeRfbYfS4kA4qvtcvy7adf']
+      ];
+
+      let y = pad + 180;
+      ctx.font = 'bold 40px Segoe UI, sans-serif';
+      lines.forEach(([k,v])=>{
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText(k + ':', pad+60, y);
+        ctx.fillStyle = '#e6e6e6';
+        ctx.font = '400 40px Segoe UI, sans-serif';
+        wrapText(ctx, String(v), pad+360, y, w - pad - 380, 48);
+        y += 80;
+        ctx.font = 'bold 40px Segoe UI, sans-serif';
+      });
+
+      // Footer note
+      ctx.fillStyle = '#bdbdbd';
+      ctx.font = '400 32px Segoe UI, sans-serif';
+      wrapText(ctx, 'Please upload your Binance payment slip along with your email address in the chat box for a prompt response.', pad+60, h - pad - 140, w - 2*pad - 120, 44);
+
+      // Small brand
+      ctx.fillStyle = '#FFD700';
+      ctx.font = '600 34px Segoe UI, sans-serif';
+      ctx.fillText('OnexGain Signal', pad+60, h - pad - 40);
+
+      const link = document.createElement('a');
+      link.download = `Deposit_Slip_${get('conf_order') || 'ONEX'}_.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill=true) {
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y, x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x, y+h, r);
+      ctx.arcTo(x, y+h, x, y, r);
+      ctx.arcTo(x, y, x+w, y, r);
+      ctx.closePath();
+      if (fill) ctx.fill(); else ctx.stroke();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+      const words = String(text).split(' ');
+      let line = '', yy = y;
+      for(let n=0;n<words.length;n++){
+        const test = line + words[n] + ' ';
+        if(ctx.measureText(test).width > maxWidth){
+          ctx.fillText(line, x, yy);
+          line = words[n] + ' ';
+          yy += lineHeight;
+        } else {
+          line = test;
+        }
+      }
+      ctx.fillText(line, x, yy);
+    }
+
     /* ====== INIT ====== */
     (function init(){
       // Pre-fill order id
@@ -445,9 +507,5 @@
       updateDepositWallet();
     })();
   </script>
-</body>
-</html>
-<!-- partial -->
-  
 </body>
 </html>
