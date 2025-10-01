@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -283,7 +283,6 @@
     .pnl-underbar .selector { margin:6px 0 10px; display:flex; justify-content:flex-start; gap:20px; font-size:13px; transform:translateX(calc(-2cm + 1.5cm)); }
     .pnl-underbar .selector label { display:flex; align-items:center; gap:5px; cursor:pointer; }
     .pnl-underbar .selector input[type="radio"] { accent-color:white; }
-    .pnl-underbar .selector .note { color:#cfd3dc; }
     .pnl-underbar .bottom-bar { display:flex; justify-content:center; gap:10px; margin-top:8px; transform:translateX(-1.2cm); align-self:center; }
     .pnl-underbar .action {
       width:45px; height:45px; background:#1b1c22; border:1px solid #2e2f37; border-radius:12px;
@@ -294,7 +293,6 @@
     .pnl-underbar .action img { width:18px; height:18px; display:block; }
     .pnl-underbar .action span { font-size:10px; color:#cfd3dc; }
 
-    /* Existing glyph patch for any '1' inside pnl-card */
     .pnl-card .one-glyph{
       font-family: "Binance PLEX", Inter, "Segoe UI", system-ui, -apple-system, sans-serif !important;
       font-weight: 700;
@@ -304,12 +302,12 @@
     }
     .no-one-stylize .one-glyph{ font-family: inherit !important; font-weight: inherit !important; }
 
-    /* NEW: Only shrink '1' in DAY (DD) part under the username */
-    .pnl-card .one-day-small{
-      font-size: 0.88em;   /* ටිකක් පොඩි */
+    /* === NEW: Only shrink the first digit '1' of the MONTH inside the date under the username === */
+    .pnl-card #pnlTime .date-one{
+      font-size: 0.86em; /* match the smaller date-digit size */
       line-height: 1;
       display:inline-block;
-      transform: translateY(0.2px);
+      transform: translateY(0.1px);
     }
   </style>
 </head>
@@ -366,10 +364,8 @@
       </div>
 
       <div class="small-balances">
-        <div class="small-item">
-          <div class class="label">Wallet Balance (USD)</div>
-          <div class="value" id="walletValue">Loading…</div>
-        </div>
+        <div class class="label">Wallet Balance (USD)</div>
+        <div class="value" id="walletValue">Loading…</div>
         <div class="small-item">
           <div class="label">Unrealized PNL (USD)</div>
           <div class="value" id="unrealizedValue">Loading…</div>
@@ -908,40 +904,32 @@
     let currentSharedTrade = null;
     const usernameStatic = 'Denuwanlakshitha';
 
-    /* original plain stamp for filenames etc. */
     function nowStamp(){
       const d=new Date();
       const pad=(n)=>String(n).padStart(2,'0');
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-    /* NEW: Build HTML where only the DAY's '1' digits are slightly smaller */
-    function nowStampHTML(){
-      const d=new Date();
-      const pad=(n)=>String(n).padStart(2,'0');
-      const yyyy = d.getFullYear();
-      const mm   = pad(d.getMonth()+1);
-      const dd   = pad(d.getDate());
-      const hh   = pad(d.getHours());
-      const mi   = pad(d.getMinutes());
-      const ss   = pad(d.getSeconds());
-
-      // Only touch "dd". If dd contains '1', wrap those with one-glyph + one-day-small
-      const ddHTML = dd.split('').map(ch =>
-        ch === '1' ? '<span class="one-glyph one-day-small">1</span>' : ch
-      ).join('');
-
-      return `${yyyy}-${mm}-${ddHTML} ${hh}:${mi}:${ss}`;
+    // === NEW: render date with only the MONTH's first digit '1' shrunk ===
+    function renderStampWithSmallMonthOne(stamp){
+      const m = stamp.match(/^(\d{4})-(\d{2})-(\d{2})( .*)$/);
+      if(!m) return stamp;
+      const y = m[1];
+      let mo = m[2];
+      const d = m[3];
+      const rest = m[4] || '';
+      if (mo[0] === '1') {
+        mo = '<span class="date-one">1</span>' + mo[1];
+      }
+      return `${y}-${mo}-${d}${rest}`;
     }
 
     function openPNLModal(trade){
       setBottomInset();
       currentSharedTrade = trade;
       pnlEls.user.textContent = usernameStatic;
-
-      // Use HTML version for the UI (shrinks only day '1'); keep plain for other uses.
-      pnlEls.time.innerHTML = nowStampHTML();
-
+      // Use innerHTML so the month '1' can be wrapped with the small span
+      pnlEls.time.innerHTML = renderStampWithSmallMonthOne(nowStamp());
       updatePNLCardFromTrade(trade);
       pnlEls.backdrop.classList.add('open');
       pnlEls.backdrop.setAttribute('aria-hidden','false');
