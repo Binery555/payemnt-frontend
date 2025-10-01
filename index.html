@@ -283,6 +283,7 @@
     .pnl-underbar .selector { margin:6px 0 10px; display:flex; justify-content:flex-start; gap:20px; font-size:13px; transform:translateX(calc(-2cm + 1.5cm)); }
     .pnl-underbar .selector label { display:flex; align-items:center; gap:5px; cursor:pointer; }
     .pnl-underbar .selector input[type="radio"] { accent-color:white; }
+    .pnl-underbar .selector .disabled { opacity:.6; pointer-events:none; }
     .pnl-underbar .bottom-bar { display:flex; justify-content:center; gap:10px; margin-top:8px; transform:translateX(-1.2cm); align-self:center; }
     .pnl-underbar .action {
       width:45px; height:45px; background:#1b1c22; border:1px solid #2e2f37; border-radius:12px;
@@ -293,6 +294,7 @@
     .pnl-underbar .action img { width:18px; height:18px; display:block; }
     .pnl-underbar .action span { font-size:10px; color:#cfd3dc; }
 
+    /* Force digit 1 to Binance PLEX when needed */
     .pnl-card .one-glyph{
       font-family: "Binance PLEX", Inter, "Segoe UI", system-ui, -apple-system, sans-serif !important;
       font-weight: 700;
@@ -302,12 +304,12 @@
     }
     .no-one-stylize .one-glyph{ font-family: inherit !important; font-weight: inherit !important; }
 
-    /* === NEW: Only shrink the first digit '1' of the MONTH inside the date under the username === */
-    .pnl-card #pnlTime .date-one{
-      font-size: 0.86em; /* match the smaller date-digit size */
+    /* >>> NEW: Month '1' tiny style (only the first digit of month) <<< */
+    .pnl-card .month-one{
+      font-size: .80em;           /* make it a touch smaller */
       line-height: 1;
       display:inline-block;
-      transform: translateY(0.1px);
+      transform: translateY(.2px);/* align nicely with separators */
     }
   </style>
 </head>
@@ -364,8 +366,10 @@
       </div>
 
       <div class="small-balances">
-        <div class class="label">Wallet Balance (USD)</div>
-        <div class="value" id="walletValue">Loading…</div>
+        <div class="small-item">
+          <div class class="label">Wallet Balance (USD)</div>
+          <div class="value" id="walletValue">Loading…</div>
+        </div>
         <div class="small-item">
           <div class="label">Unrealized PNL (USD)</div>
           <div class="value" id="unrealizedValue">Loading…</div>
@@ -910,26 +914,25 @@
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
-    // === NEW: render date with only the MONTH's first digit '1' shrunk ===
-    function renderStampWithSmallMonthOne(stamp){
-      const m = stamp.match(/^(\d{4})-(\d{2})-(\d{2})( .*)$/);
-      if(!m) return stamp;
-      const y = m[1];
-      let mo = m[2];
-      const d = m[3];
-      const rest = m[4] || '';
-      if (mo[0] === '1') {
-        mo = '<span class="date-one">1</span>' + mo[1];
-      }
-      return `${y}-${mo}-${d}${rest}`;
+    /* >>> NEW: format time so that only the FIRST digit of month (if '1') is tiny <<< */
+    function formatTimeWithTinyMonthOne(ts){
+      // Expecting YYYY-MM-DD HH:mm:ss
+      const m = ts.match(/^(\d{4})-(\d{2})-(\d{2}) (.+)$/);
+      if(!m) return ts;
+      const [, Y, MM, DD, rest] = m;
+      const mm = (MM.charAt(0) === '1')
+        ? `<span class="month-one">1</span>${MM.charAt(1)}`
+        : MM;
+      return `${Y}-${mm}-${DD} ${rest}`;
     }
 
     function openPNLModal(trade){
       setBottomInset();
       currentSharedTrade = trade;
       pnlEls.user.textContent = usernameStatic;
-      // Use innerHTML so the month '1' can be wrapped with the small span
-      pnlEls.time.innerHTML = renderStampWithSmallMonthOne(nowStamp());
+      // Set time with month-'1' tiny
+      const ts = nowStamp();
+      pnlEls.time.innerHTML = formatTimeWithTinyMonthOne(ts);
       updatePNLCardFromTrade(trade);
       pnlEls.backdrop.classList.add('open');
       pnlEls.backdrop.setAttribute('aria-hidden','false');
